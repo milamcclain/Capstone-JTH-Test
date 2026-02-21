@@ -1,23 +1,62 @@
+import streamlit as st
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 import csv
+from datetime import datetime
+import os
 
-# Assuming form submissions are stored as a list of dictionaries
-form_submissions = []
+# Title of the web app
+st.title('Service Inquiry Form')
 
-# Your existing code to handle form submissions goes here
+# Function to save submissions to a CSV file
+def save_to_csv(data):
+    file_exists = os.path.isfile('submissions.csv')
+    with open('submissions.csv', mode='a', newline='') as file:
+        fieldnames = ['Timestamp', 'Full Name', 'Email Address', 'Phone Number', 'Company/Organization', 'Selected Services']
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        if not file_exists:
+            writer.writeheader()  # Write header if file doesn't exist
+        writer.writerow(data)
 
-# Function to collect data and write to CSV
+# Function to send confirmation email
+def send_email(email_address):
+    msg = MIMEMultipart()
+    msg['From'] = 'your_email@gmail.com'
+    msg['To'] = email_address
+    msg['Subject'] = 'Confirmation of Your Inquiry'
+    body = 'Thank you for your inquiry! We will get back to you soon.'
+    msg.attach(MIMEText(body, 'plain'))
 
-def write_to_csv(data):
-    with open('form_submissions.csv', mode='a', newline='') as file:
-        writer = csv.writer(file)
-        # Assuming data is a dictionary
-        # Write headers only if the file is empty
-        is_empty = file.tell() == 0
-        if is_empty:
-            writer.writerow(data.keys())
-        writer.writerow(data.values())
+    with smtplib.SMTP('smtp.gmail.com', 587) as server:
+        server.starttls()
+        server.login('your_email@gmail.com', 'your_password')
+        server.sendmail(msg['From'], msg['To'], msg.as_string())
 
-# Call this function where you handle form submissions
-def handle_form_submission(form_data):
-    form_submissions.append(form_data)
-    write_to_csv(form_data)
+# Form for the inquiry
+with st.form(key='inquiry_form'):
+    full_name = st.text_input('Full Name')
+    email_address = st.text_input('Email Address')
+    phone_number = st.text_input('Phone Number')
+    company_organization = st.text_input('Company/Organization')
+    services = st.multiselect('Select Services', ['Marketing', 'Strategy', 'Technology', 'Design', 'Trainings'])
+    submit_button = st.form_submit_button(label='Submit')
+
+    if submit_button:
+        # Gather data
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        data = {
+            'Timestamp': timestamp,
+            'Full Name': full_name,
+            'Email Address': email_address,
+            'Phone Number': phone_number,
+            'Company/Organization': company_organization,
+            'Selected Services': ', '.join(services)
+        }
+        try:
+            # Save to CSV and send email
+            save_to_csv(data)
+            send_email(email_address)
+            st.success('Your inquiry has been submitted successfully!')
+        except Exception as e:
+            st.error('An error occurred: ' + str(e))
