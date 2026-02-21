@@ -1,22 +1,28 @@
 import streamlit as st
-import csv
+import pandas as pd
 
-st.title("Just the Heart")
+# Set the title of the app
+st.title('Just the Heart')
 
-st.write("At Just The Heart, LLC, we're an award-winning strategy and creative firm devoted to helping brands with purpose, passion, and measurable results. From data-driven digital marketing and branding to UX design, social media, training, and full-service development solutions, we combine innovation with integrity to elevate your business and connect you with the audiences that matter most. Our team listens, collaborates, and crafts tailored strategies that truly resonate — so you can stand out, grow, and succeed.")
+# Company description blurb
+st.write('Welcome to Just the Heart, where we provide services to enhance your heart health and wellbeing. Our mission is to empower individuals to take control of their heart health through knowledge and the right resources.')
 
-# Creating a form
-with st.form("contact_form"):
-    full_name = st.text_input("Full Name")
-    email = st.text_input("Email Address")
-    phone_number = st.text_input("Phone Number")
-    company = st.text_input("Company/Organization")
-    services = st.multiselect("Select Services", ["Marketing", "Strategy", "Technology", "Design", "Trainings"])
-    submit_button = st.form_submit_button("Submit")
+# Create a form for user input
+with st.form(key='submission_form'):
+    full_name = st.text_input('Full Name')
+    email = st.text_input('Email')
+    phone = st.text_input('Phone')
+    company = st.text_input('Company')
+    services = st.multiselect('Services', ['Cardiology', 'Nutrition', 'Exercise Training', 'Stress Management'])
+    submit_button = st.submit_button('Submit')
 
+# Logic for handling the submission
 if submit_button:
-    # Save data to CSV with timestamp
-    with open('submissions.csv', mode='a', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow([full_name, email, phone_number, company, ', '.join(services), '2026-02-21 02:30:55'])
-    st.success("Submission successful!")
+    # Store submissions in a DataFrame
+    data = {'Full Name': [full_name], 'Email': [email], 'Phone': [phone], 'Company': [company], 'Services': [', '.join(services)]}
+    df = pd.DataFrame(data)
+    df.to_excel('submissions.xlsx', index=False)
+    st.success('Your submission has been recorded!')
+    st.download_button('Download Submissions', data=open('submissions.xlsx', 'rb'), file_name='submissions.xlsx', mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    
+# Run the app using streamlit run Test_for_JTH.py
