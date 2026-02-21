@@ -1,45 +1,29 @@
-import streamlit as st
-import pandas as pd
-from datetime import datetime
-import os
+# Test_for_JTH.py
 
-st.title("Just the Heart")
+# Import necessary modules
+import tkinter as tk
+from tkinter import ttk
 
-st.write("At Just The Heart, LLC, we're an award-winning strategy and creative firm devoted to helping brands with purpose, passion, and measurable results. From data-driven digital marketing and branding to UX design, social media, training, and full-service development solutions, we combine innovation with integrity to elevate your business and connect you with the audiences that matter most. Our team listens, collaborates, and crafts tailored strategies that truly resonate — so you can stand out, grow, and succeed.")
+# Create a main window
+root = tk.Tk()
+root.title("Just the Heart")
 
-st.divider()
+# Define styles for bronze color and hover effect
+style = ttk.Style()
+style.configure('Bronze.TLabel', foreground="#cd7f32")  # Bronze Color
+style.configure('Bronze.TButton', background="#cd7f32", hovercolor="#a76d47")  # Bronze with Light Hover Effect
 
-st.header("Service Inquiry Form")
+# Create a label with the title
+title_label = ttk.Label(root, text="Just the Heart", style='Bronze.TLabel')
+title_label.pack(pady=20)
 
-with st.form(key='service_form'):
-    full_name = st.text_input('Full Name')
-    email = st.text_input('Email Address')
-    phone_number = st.text_input('Phone Number')
-    company = st.text_input('Company/Organization')
-    services = st.multiselect('What services are you interested in?', ['Marketing', 'Strategy', 'Technology', 'Design', 'Trainings'])
-    submit_button = st.form_submit_button(label='Submit Inquiry')
+# Create a header
+header_label = ttk.Label(root, text="Service Inquiry Form", style='Bronze.TLabel')
+header_label.pack(pady=10)
 
-if submit_button:
-    if full_name and email and phone_number and company and services:
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        
-        new_data = {
-            "Timestamp": [timestamp],
-            "Full Name": [full_name],
-            "Email": [email],
-            "Phone": [phone_number],
-            "Company": [company],
-            "Services": [', '.join(services)]
-        }
-        new_df = pd.DataFrame(new_data)
-        
-        if os.path.exists('submissions.xlsx'):
-            existing_df = pd.read_excel('submissions.xlsx')
-            combined_df = pd.concat([existing_df, new_df], ignore_index=True)
-            combined_df.to_excel('submissions.xlsx', index=False)
-        else:
-            new_df.to_excel('submissions.xlsx', index=False)
-        
-        st.success('Thank you for your submission! We will be in touch soon.')
-    else:
-        st.error('Please fill out all fields.')
+# Create a submit button
+submit_button = ttk.Button(root, text="Submit", style='Bronze.TButton')
+submit_button.pack(pady=20)
+
+# Run the main loop
+root.mainloop()
