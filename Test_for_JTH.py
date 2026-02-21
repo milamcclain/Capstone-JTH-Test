@@ -1,1 +1,45 @@
-import streamlit as st\nimport pandas as pd\n\n# Set page configuration\nst.title('<h1 style="color: #cd7f32;">Just the Heart</h1>', unsafe_allow_html=True)\nst.header('<h2 style="color: #cd7f32;">Service Inquiry Form</h2>', unsafe_allow_html=True)\n\n# Create a form\nwith st.form(key='service_inquiry_form'):\n    full_name = st.text_input('Full Name')\n    email = st.text_input('Email Address')\n    phone = st.text_input('Phone Number')\n    company = st.text_input('Company/Organization')\n    services = st.multiselect('Services', ['Service A', 'Service B', 'Service C'])\n\n    # Submit button with style\n    submit_button = st.form_submit_button('Submit',  \n        style="background-color: #cd7f32; color: white; font-size: 16px;")\n\n    if submit_button:\n        # Save to Excel file\n        data = {\n            'Full Name': [full_name],\n            'Email Address': [email],\n            'Phone Number': [phone],\n            'Company/Organization': [company],\n            'Services': [', '.join(services)]\n        }\n        \n        df = pd.DataFrame(data)\n        df.to_excel('submissions.xlsx', index=False, mode='a', header=False)\n\n        st.success('Submission successful!')\n
+import streamlit as st
+import pandas as pd
+from datetime import datetime
+import os
+
+st.title("Just the Heart")
+
+st.write("At Just The Heart, LLC, we're an award-winning strategy and creative firm devoted to helping brands with purpose, passion, and measurable results. From data-driven digital marketing and branding to UX design, social media, training, and full-service development solutions, we combine innovation with integrity to elevate your business and connect you with the audiences that matter most. Our team listens, collaborates, and crafts tailored strategies that truly resonate — so you can stand out, grow, and succeed.")
+
+st.divider()
+
+st.header("Service Inquiry Form")
+
+with st.form(key='service_form'):
+    full_name = st.text_input('Full Name')
+    email = st.text_input('Email Address')
+    phone_number = st.text_input('Phone Number')
+    company = st.text_input('Company/Organization')
+    services = st.multiselect('What services are you interested in?', ['Marketing', 'Strategy', 'Technology', 'Design', 'Trainings'])
+    submit_button = st.form_submit_button(label='Submit Inquiry')
+
+if submit_button:
+    if full_name and email and phone_number and company and services:
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        new_data = {
+            "Timestamp": [timestamp],
+            "Full Name": [full_name],
+            "Email": [email],
+            "Phone": [phone_number],
+            "Company": [company],
+            "Services": [', '.join(services)]
+        }
+        new_df = pd.DataFrame(new_data)
+        
+        if os.path.exists('submissions.xlsx'):
+            existing_df = pd.read_excel('submissions.xlsx')
+            combined_df = pd.concat([existing_df, new_df], ignore_index=True)
+            combined_df.to_excel('submissions.xlsx', index=False)
+        else:
+            new_df.to_excel('submissions.xlsx', index=False)
+        
+        st.success('Thank you for your submission! We will be in touch soon.')
+    else:
+        st.error('Please fill out all fields.')
