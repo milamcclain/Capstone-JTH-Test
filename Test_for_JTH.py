@@ -1,1 +1,59 @@
-import os\nimport pandas as pd\nfrom flask import Flask, render_template, request, redirect, url_for, flash\n\napp = Flask(__name__)\napp.config['SECRET_KEY'] = 'your_secret_key'\n\n@app.route('/')\ndef home():\n    return render_template('index.html')\n\n@app.route('/upload', methods=['POST'])\ndef upload():\n    if 'file' not in request.files:\n        flash('No file part')\n        return redirect(request.url)\n    file = request.files['file']\n    if file.filename == '':\n        flash('No selected file')\n        return redirect(request.url)\n    if file:\n        df = pd.read_excel(file)\n        company_description = 'The company specializes in providing innovative solutions to enhance productivity and efficiency.'  # replace with user-submitted description\n        # Handle the DataFrame as necessary\n        return render_template('success.html', data=df.to_html(), description=company_description)\n\nif __name__ == '__main__':\n    app.run(debug=True)
+import streamlit as st
+import pandas as pd
+from datetime import datetime
+import os
+
+st.title("Just the Heart")
+
+st.write("At Just The Heart, LLC, we're an award-winning strategy and creative firm devoted to helping brands with purpose, passion, and measurable results. From data-driven digital marketing and branding to UX design, social media, training, and full-service development solutions, we combine innovation with integrity to elevate your business and connect you with the audiences that matter most. Our team listens, collaborates, and crafts tailored strategies that truly resonate — so you can stand out, grow, and succeed.")
+
+st.divider()
+
+st.header("Service Inquiry Form")
+
+with st.form(key='service_form'):
+    full_name = st.text_input('Full Name')
+    email = st.text_input('Email Address')
+    phone_number = st.text_input('Phone Number')
+    company = st.text_input('Company/Organization')
+    services = st.multiselect('What services are you interested in?', ['Marketing', 'Strategy', 'Technology', 'Design', 'Trainings'])
+    submit_button = st.form_submit_button(label='Submit Inquiry')
+
+if submit_button:
+    if full_name and email and phone_number and company and services:
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        new_data = {
+            "Timestamp": [timestamp],
+            "Full Name": [full_name],
+            "Email": [email],
+            "Phone": [phone_number],
+            "Company": [company],
+            "Services": [', '.join(services)]
+        }
+        new_df = pd.DataFrame(new_data)
+        
+        if os.path.exists('submissions.xlsx'):
+            existing_df = pd.read_excel('submissions.xlsx')
+            combined_df = pd.concat([existing_df, new_df], ignore_index=True)
+            combined_df.to_excel('submissions.xlsx', index=False)
+        else:
+            new_df.to_excel('submissions.xlsx', index=False)
+        
+        st.success('Thank you for your submission! We will be in touch soon.')
+    else:
+        st.error('Please fill out all fields.')
+
+st.divider()
+st.subheader("Download Submissions")
+
+if os.path.exists('submissions.xlsx'):
+    with open('submissions.xlsx', 'rb') as file:
+        st.download_button(
+            label="Download Excel File",
+            data=file.read(),
+            file_name="submissions.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+else:
+    st.info("No submissions yet.")
