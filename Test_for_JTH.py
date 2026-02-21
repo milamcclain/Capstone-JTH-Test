@@ -1,20 +1,64 @@
 import streamlit as st
+import pandas as pd
+from datetime import datetime
+import os
 
-# Set the page configuration
-st.set_page_config(page_title='Capstone JTH Test', layout='wide')
+st.markdown("""
+    <style>
+    h1 {
+        color: #B8860B;
+    }
+    h2 {
+        color: #B8860B;
+    }
+    .stButton > button {
+        background-color: #B8860B;
+        color: white;
+    }
+    .stButton > button:hover {
+        background-color: #D4A574;
+        color: white;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-# Title with bronze color
-st.markdown('<h1 style="color: #cd7f32;">Welcome to the Capstone JTH Test</h1>', unsafe_allow_html=True)
+st.title("Just the Heart")
 
-# Header
-st.header('Please fill out the form below:')
+st.write("At Just The Heart, LLC, we're an award-winning strategy and creative firm devoted to helping brands with purpose, passion, and measurable results. From data-driven digital marketing and branding to UX design, social media, training, and full-service development solutions, we combine innovation with integrity to elevate your business and connect you with the audiences that matter most. Our team listens, collaborates, and crafts tailored strategies that truly resonate — so you can stand out, grow, and succeed.")
 
-# Input fields
-name = st.text_input('Your Name')
-email = st.text_input('Your Email')
+st.divider()
 
-# Submit button with hover effect
-if st.button('Submit', key='submit'):
-    st.write(f'Thank you, {name}! Your email {email} has been submitted.')
-else:
-    st.markdown('<style>button.stButton:hover {background-color: #cd7f32; color: white;}</style>', unsafe_allow_html=True)
+st.header("Service Inquiry Form")
+
+with st.form(key='service_form'):
+    full_name = st.text_input('Full Name')
+    email = st.text_input('Email Address')
+    phone_number = st.text_input('Phone Number')
+    company = st.text_input('Company/Organization')
+    services = st.multiselect('What services are you interested in?', ['Marketing', 'Strategy', 'Technology', 'Design', 'Trainings'])
+    submit_button = st.form_submit_button(label='Submit Inquiry')
+
+if submit_button:
+    if full_name and email and phone_number and company and services:
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        new_data = {
+            "Timestamp": [timestamp],
+            "Full Name": [full_name],
+            "Email": [email],
+            "Phone": [phone_number],
+            "Company": [company],
+            "Services": [', '.join(services)]
+        }
+        new_df = pd.DataFrame(new_data)
+        
+        if os.path.exists('submissions.xlsx'):
+            existing_df = pd.read_excel('submissions.xlsx')
+            combined_df = pd.concat([existing_df, new_df], ignore_index=True)
+            combined_df.to_excel('submissions.xlsx', index=False)
+        else:
+            new_df.to_excel('submissions.xlsx', index=False)
+        
+        st.success('Thank you for your submission! We will be in touch soon.')
+    else:
+        st.error('Please fill out all fields.')
