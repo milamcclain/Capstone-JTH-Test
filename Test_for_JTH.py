@@ -1,19 +1,9 @@
-from flask import Flask, render_template, request, jsonify
+import streamlit as st
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-app = Flask(__name__)
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-@app.route('/submit', methods=['POST'])
-def submit():
-    data = request.json
-    send_email(data['name'], data['email'], data['phone'], data['company'], data['services'])
-    return jsonify({'status': 'success'})
+st.title("Service Inquiry Form")
 
 def send_email(name, email_address, phone, company, services):
     sender_email = "myname@gmail.com"  # Replace with your Gmail
@@ -51,9 +41,23 @@ def send_email(name, email_address, phone, company, services):
         server.login(sender_email, sender_password)
         server.sendmail(sender_email, email_address, message.as_string())
         server.quit()
-        print("\n✓ Email sent successfully!")
+        return True
     except Exception as error:
-        print(f"\n✗ Error sending email: {error}")
+        st.error(f"✗ Error sending email: {error}")
+        return False
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# Create form
+with st.form("inquiry_form"):
+    name = st.text_input("Full Name")
+    email = st.text_input("Email Address")
+    phone = st.text_input("Phone Number")
+    company = st.text_input("Company/Organization")
+    services = st.multiselect("Select Services", ["Service 1", "Service 2", "Service 3"])
+    
+    submitted = st.form_submit_button("Submit")
+    
+    if submitted:
+        if send_email(name, email, phone, company, services):
+            st.success("✓ Email sent successfully!")
+        else:
+            st.error("Failed to send email. Please try again.")
