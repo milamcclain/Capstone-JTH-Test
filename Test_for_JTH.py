@@ -1,29 +1,20 @@
-# Test_for_JTH.py
+import streamlit as st
 
-# Import necessary modules
-import tkinter as tk
-from tkinter import ttk
+# Set the page configuration
+st.set_page_config(page_title='Capstone JTH Test', layout='wide')
 
-# Create a main window
-root = tk.Tk()
-root.title("Just the Heart")
+# Title with bronze color
+st.markdown('<h1 style="color: #cd7f32;">Welcome to the Capstone JTH Test</h1>', unsafe_allow_html=True)
 
-# Define styles for bronze color and hover effect
-style = ttk.Style()
-style.configure('Bronze.TLabel', foreground="#cd7f32")  # Bronze Color
-style.configure('Bronze.TButton', background="#cd7f32", hovercolor="#a76d47")  # Bronze with Light Hover Effect
+# Header
+st.header('Please fill out the form below:')
 
-# Create a label with the title
-title_label = ttk.Label(root, text="Just the Heart", style='Bronze.TLabel')
-title_label.pack(pady=20)
+# Input fields
+name = st.text_input('Your Name')
+email = st.text_input('Your Email')
 
-# Create a header
-header_label = ttk.Label(root, text="Service Inquiry Form", style='Bronze.TLabel')
-header_label.pack(pady=10)
-
-# Create a submit button
-submit_button = ttk.Button(root, text="Submit", style='Bronze.TButton')
-submit_button.pack(pady=20)
-
-# Run the main loop
-root.mainloop()
+# Submit button with hover effect
+if st.button('Submit', key='submit'):
+    st.write(f'Thank you, {name}! Your email {email} has been submitted.')
+else:
+    st.markdown('<style>button.stButton:hover {background-color: #cd7f32; color: white;}</style>', unsafe_allow_html=True)
